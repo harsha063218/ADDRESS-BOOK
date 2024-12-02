@@ -9,6 +9,7 @@ struct address_book {
     char mail_id[30];
     int serial_no;
 };
+extern int count;
 void add(struct address_book data[]);
 void list(struct address_book data[]);
 int search_contact(struct address_book data[], int *indices, int mode);
