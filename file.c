@@ -2,14 +2,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "types.h"
+#include "file.h"
 
-struct address_book {
-    char name[30];
-    char mobile_no[11];
-    char mail_id[30];
-    int serial_no;
-};
-int count;
 Status isname(char *name) {
     for (int i = 0; i < strlen(name); i++) {
         if (!isalpha(name[i]) && name[i] != ' ') {
@@ -31,13 +25,13 @@ Status ismobile(char *mobile_no) {
 }
 Status isemail(char *email) {
     int p1 =-1, p2 =-1;
-    int count = 0;
+    int at_count = 0;
     for (int i=0; i<strlen(email);i++) {
         if (email[i] == '@') {
             if (p1==-1) {
                 p1=i;
             }
-            count++;
+            at_count++;
         } else if (email[i] == '.') {
             if (i>p1) {
                 p2=i;
@@ -46,7 +40,7 @@ Status isemail(char *email) {
             return e_failure; 
         }
     }
-    if (count!=1||p1 < 1||p2<p1+2||p2>=strlen(email)-1) {
+    if (at_count!=1||p1 < 1||p2<p1+2||p2>=strlen(email)-1) {
         return e_failure;
     }
     if (strcmp(email + p2, ".com") != 0 && strcmp(email + p2, ".in") != 0) {
