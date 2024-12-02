@@ -3,9 +3,12 @@ NAME         :  K HARSHAVARDHAN
 ID           :  24016_169
 PROJECT NAME :  ADDRESS BOOK
 */
-#include<stdio.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "file.h"
 #include "types.h"
+
 int count;
 
 int main() {
@@ -13,22 +16,58 @@ int main() {
     int choice;
     FILE *fptr;
     char str[100];
-    fptr=fopen("data.csv","r");
-    fgets(str,100,fptr);
-    count=atoi(str+1);
-    for (int i = 0; i < count; i++)
-    {
-        fgets(str,100,fptr);
-        data[i].serial_no=atoi(strtok(str,","));
-        strcpy(data[i].name,strtok(NULL,","));
-        strcpy(data[i].mobile_no,strtok(NULL,","));
-        strcpy(data[i].mail_id,strtok(NULL,","));
-        
+   fptr = fopen("data.csv", "r");
+if (fptr == NULL) {
+    fptr = fopen("data.csv", "w");
+    if (fptr == NULL) {
+        perror("Error creating file");
+        return 1;
+    }
+    fprintf(fptr, "#0\n"); 
+    fclose(fptr);
+
+    printf("No existing contacts. A new file 'data.csv' has been created.\n");
+    count = 0;
+} else {
+    if (fgets(str, sizeof(str), fptr) == NULL) {
+        fprintf(stderr, "Error: Unable to read count from file.\n");
+        fclose(fptr);
+        return 1;
+    }
+    count = atoi(str + 1);
+    if (count < 0 || count > 200) {
+        fprintf(stderr, "Error: Invalid count value (%d) in file.\n", count);
+        fclose(fptr);
+        return 1;
+    }
+    for (int i = 0; i < count; i++) {
+        if (fgets(str, sizeof(str), fptr) == NULL) {
+            fprintf(stderr, "Error: Unable to read contact %d from file.\n", i + 1);
+            fclose(fptr);
+            return 1;
+        }
+
+        char *token = strtok(str, ",");
+        if (token == NULL) { fprintf(stderr, "Error: Missing serial number.\n"); break; }
+        data[i].serial_no = atoi(token);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) { fprintf(stderr, "Error: Missing name.\n"); break; }
+        strcpy(data[i].name, token);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) { fprintf(stderr, "Error: Missing mobile number.\n"); break; }
+        strcpy(data[i].mobile_no, token);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) { fprintf(stderr, "Error: Missing email ID.\n"); break; }
+        strcpy(data[i].mail_id, token);
     }
     fclose(fptr);
+}
     do {
-        printf("==================================================================================");
-        printf("\nAddress Book Menu:\n");
+        printf("==================================================================================\n");
+        printf("Address Book Menu:\n");
         printf("==================================================================================\n");
         printf("1. Create Contact\n");
         printf("2. Search Contact\n");
@@ -38,18 +77,18 @@ int main() {
         printf("6. Exit\n");
         printf("==================================================================================\n");
         printf("Choose an option [1-6]: ");
-        if(scanf("%d", &choice)!=1||choice<1||choice>6){
-            printf("Invalid choice please enter a number between 1 and 6\n");
-            while(getchar()!='\n');
+        if (scanf("%d", &choice) != 1 || choice < 1 || choice > 6) {
+            printf("Invalid choice. Please enter a number between 1 and 6.\n");
+            while (getchar() != '\n');
             continue;
         }
-        
+
         switch (choice) {
             case e_add:
                 add(data);
                 break;
             case e_search:
-                search(data); 
+                search(data);
                 break;
             case e_edit:
                 edit(data);
@@ -62,14 +101,14 @@ int main() {
                 break;
             case e_exit:
                 printf("Exiting Address Book.\n");
-                FILE *fptr=fopen("data.csv","w");
-                if(fptr==NULL){
-                printf("Unable to open file for saving");
-                exit(0);
-                 }
-                 fprintf(fptr,"#%d\n",count);
-                for(int i=0;i<count;i++){
-                fprintf(fptr,"%d,%s,%s,%s,\n",data[i].serial_no,data[i].name,data[i].mobile_no,data[i].mail_id);
+                fptr = fopen("data.csv", "w");
+                if (fptr == NULL) {
+                    printf("Unable to open file for saving.\n");
+                    exit(0);
+                }
+                fprintf(fptr, "#%d\n", count);
+                for (int i = 0; i < count; i++) {
+                    fprintf(fptr, "%d,%s,%s,%s,\n", data[i].serial_no, data[i].name, data[i].mobile_no, data[i].mail_id);
                 }
                 fclose(fptr);
                 break;
